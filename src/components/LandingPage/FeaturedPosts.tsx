@@ -1,18 +1,17 @@
-import { getFeaaturedPosts } from '@/app/api/api'
+import { getFeaturedPosts } from '@/app/api/api'
 import { PostProps } from '@/Utils'
 import Link from 'next/link'
 import PostCard from '../posts/PostCard'
 import BlogWrapper from '../ui/BlogWrapper'
-export const revalidate = 3600 // Revalidate every hour
-export const dynamic = 'force-static'
+
 export default async function FeaturedPosts() {
-	const props = await getFeaaturedPosts()
+	const props = await getFeaturedPosts()
 
 	const {
 		posts,
 	}: {
 		posts: PostProps[]
-	} = Array.isArray(props) ? { posts: [] } : props.props
+	} = props.props
 
 	return (
 		<BlogWrapper height="600px">

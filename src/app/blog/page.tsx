@@ -2,8 +2,6 @@ import PostCard from '@/components/posts/PostCard'
 import BlogWrapper from '@/components/ui/BlogWrapper'
 import { PostProps } from '@/Utils'
 import { getPosts } from '../api/api'
-export const revalidate = 3600 // Revalidate every hour
-export const dynamic = 'force-static'
 
 export default async function Posts() {
 	const props = await getPosts()
@@ -12,7 +10,7 @@ export default async function Posts() {
 		posts,
 	}: {
 		posts: PostProps[]
-	} = Array.isArray(props) ? { posts: [] } : props.props
+	} = props.props
 	return (
 		<BlogWrapper>
 			<div className="max-w-5xl mb-16">

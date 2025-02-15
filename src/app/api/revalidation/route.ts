@@ -1,4 +1,4 @@
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest): Promise<NextResponse> {
 	const requestHeaders = new Headers(request.headers)
@@ -8,7 +8,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		return NextResponse.json({ message: 'Invalid secret' }, { status: 401 })
 	}
 	try {
-		revalidatePath('/')
+		let postSlug = request.body.fields.slug['en-US']
+
+		revalidateTag('featuredPosts')
+		revalidateTag('posts')
+		revalidateTag(`/blog/${postSlug}`)
+
 		return NextResponse.json({ revalidated: true, now: Date.now() })
 	} catch (error) {
 		return NextResponse.json({ error: 'Revalidation failed' }, { status: 500 })

@@ -1,45 +1,74 @@
 import { client } from '@/lib/contentful/client'
 
-export async function getPosts() {
-	try {
-		const response = await client.getEntries({
-			content_type: 'post', // Replace with your content type
-			order: '-sys.createdAt',
-			limit: 10,
-		})
+import { unstable_cache as cache } from 'next/cache'
 
-		return {
-			props: {
-				posts: response.items,
-			},
-		}
-	} catch (error) {
-		console.error('Contentful fetch error:', error)
-		return []
-	}
-}
-export async function getFeaaturedPosts() {
-	try {
-		const response = await client.getEntries({
-			content_type: 'post', // Replace with your content type
-			order: '-sys.createdAt',
-			limit: 3,
-			'fields.featured': true,
-		})
-		return {
-			props: {
-				posts: response.items,
-			},
-		}
-	} catch (error) {
-		console.error('Contentful fetch error:', error)
-		return []
-	}
-}
+export const getPosts = cache(
+	async () => {
+		try {
+			const response = await client.getEntries({
+				content_type: 'post',
+				include: 2, // Include linked assets
+				order: '-sys.createdAt', // Add ordering to ensure latest posts appear first
+			})
 
-// Cache configuration
-export const postKeys = {
-	all: ['posts'],
-	lists: () => [...postKeys.all, 'list'],
-	featured: () => [...postKeys.all, 'featured'],
-}
+			if (!response?.items) {
+				throw new Error('Failed to fetch posts')
+			}
+
+			return {
+				props: {
+					posts: response.items,
+				},
+			}
+		} catch (error) {
+			console.error('Error fetching posts:', error)
+			return {
+				props: {
+					posts: [],
+				},
+			}
+		}
+	},
+	['posts'], // Simplified cache key
+	{
+		tags: ['posts'], // Matching tag for revalidation
+		revalidate: 3600, // Fallback revalidation in seconds (1 hour)
+	},
+)
+
+export const getFeaturedPosts = cache(
+	async () => {
+		try {
+			const response = await client.getEntries({
+				content_type: 'post',
+				include: 2, // Include linked assets
+
+				order: '-sys.createdAt', // Add ordering to ensure latest posts appear first
+				limit: 3,
+				'fields.featured': true,
+			})
+
+			if (!response?.items) {
+				throw new Error('Failed to fetch posts')
+			}
+
+			return {
+				props: {
+					posts: response.items,
+				},
+			}
+		} catch (error) {
+			console.error('Error fetching posts:', error)
+			return {
+				props: {
+					posts: [],
+				},
+			}
+		}
+	},
+	['featuredPosts'], // Simplified cache key
+	{
+		tags: ['featuredPosts'], // Matching tag for revalidation
+		revalidate: 3600, // Fallback revalidation in seconds (1 hour)
+	},
+)
