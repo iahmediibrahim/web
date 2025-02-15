@@ -1,41 +1,9 @@
 import PostCard from '@/components/posts/PostCard'
 import BlogWrapper from '@/components/ui/BlogWrapper'
-import { client } from '@/lib/contentful/client'
 import { PostProps } from '@/Utils'
-import { unstable_cache as cache } from 'next/cache'
-
-const getPosts = cache(
-	async () => {
-		try {
-			const response = await client.getEntries({
-				content_type: 'post',
-				order: '-sys.createdAt', // Add ordering to ensure latest posts appear first
-			})
-
-			if (!response?.items) {
-				throw new Error('Failed to fetch posts')
-			}
-
-			return {
-				props: {
-					posts: response.items,
-				},
-			}
-		} catch (error) {
-			console.error('Error fetching posts:', error)
-			return {
-				props: {
-					posts: [],
-				},
-			}
-		}
-	},
-	['posts'], // Simplified cache key
-	{
-		tags: ['posts'], // Matching tag for revalidation
-		revalidate: 3600, // Fallback revalidation in seconds (1 hour)
-	},
-)
+import { getPosts } from '../api/api'
+export const revalidate = 3600 // Revalidate every hour
+export const dynamic = 'force-static'
 
 export default async function Posts() {
 	const props = await getPosts()
@@ -44,7 +12,7 @@ export default async function Posts() {
 		posts,
 	}: {
 		posts: PostProps[]
-	} = props!.props
+	} = Array.isArray(props) ? { posts: [] } : props.props
 	return (
 		<BlogWrapper>
 			<div className="max-w-5xl mb-16">

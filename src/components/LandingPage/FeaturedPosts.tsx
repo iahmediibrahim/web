@@ -1,31 +1,18 @@
-import { client } from '@/lib/contentful/client'
+import { getFeaaturedPosts } from '@/app/api/api'
 import { PostProps } from '@/Utils'
 import Link from 'next/link'
 import PostCard from '../posts/PostCard'
 import BlogWrapper from '../ui/BlogWrapper'
-
-export async function getPosts() {
-	const response = await client.getEntries({
-		content_type: 'post',
-		'fields.featured': true,
-		order: '-sys.createdAt',
-	})
-
-	return {
-		props: {
-			posts: response.items,
-			next: { tags: ['blog'] },
-		},
-	}
-}
+export const revalidate = 3600 // Revalidate every hour
+export const dynamic = 'force-static'
 export default async function FeaturedPosts() {
-	const props = await getPosts()
+	const props = await getFeaaturedPosts()
 
 	const {
 		posts,
 	}: {
 		posts: PostProps[]
-	} = props.props
+	} = Array.isArray(props) ? { posts: [] } : props.props
 
 	return (
 		<BlogWrapper height="600px">
