@@ -8,7 +8,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		return NextResponse.json({ message: 'Invalid secret' }, { status: 401 })
 	}
 	try {
-		let postSlug = request.body.fields.slug['en-US']
+		const body = await request.json()
+		const postSlug = body?.fields?.slug?.['en-US']
 
 		revalidateTag('featuredPosts')
 		revalidateTag('posts')
