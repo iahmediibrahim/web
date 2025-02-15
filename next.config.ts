@@ -2,7 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
 	reactStrictMode: true,
-	output: 'standalone', // Required for Azure Web Apps (Node.js server)
+	// output: 'standalone', // Required for Azure Web Apps (Node.js server)
 	images: {
 		remotePatterns: [
 			{
